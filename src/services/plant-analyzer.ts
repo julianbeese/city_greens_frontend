@@ -8,9 +8,13 @@ export interface PlantAnalysis {
    */
   status: 'healthy' | 'unhealthy' | string; // Allow for more specific unhealthy statuses
   /**
-   * Detailed information about the analysis results, potentially including recommendations.
+   * Detailed information about the analysis results (diagnosis).
    */
   details: string;
+  /**
+   * Recommended actions to take based on the analysis, if applicable.
+   */
+  recommendations?: string;
 }
 
 /**
@@ -55,19 +59,36 @@ export async function analyzePlantImage(image: File): Promise<PlantAnalysis> {
 
     const randomStatus = Math.random() > 0.4 ? 'healthy' : 'unhealthy';
     let randomDetails = 'No significant issues detected. Keep up the good work!';
+    let randomRecommendations: string | undefined = undefined;
+
      if (randomStatus === 'unhealthy') {
         const issues = [
-            'Yellowing leaves detected, possible nutrient deficiency (Nitrogen). Consider fertilizing.',
-            'Signs of pest damage (aphids) on lower leaves. Apply insecticidal soap.',
-            'Dark spots on leaves, potential early blight. Remove affected leaves and ensure good air circulation.',
-            'Wilting observed, check soil moisture levels. May need watering.',
+            {
+                details: 'Yellowing leaves detected, possible nutrient deficiency (Nitrogen).',
+                recommendations: 'Apply a balanced liquid fertilizer rich in Nitrogen. Follow product instructions carefully.'
+            },
+            {
+                details: 'Signs of pest damage (aphids) on lower leaves.',
+                recommendations: 'Spray the plant with insecticidal soap, focusing on the undersides of leaves. Repeat application if necessary.'
+            },
+            {
+                details: 'Dark spots on leaves, potential early blight.',
+                recommendations: 'Remove and destroy affected leaves immediately. Ensure good air circulation around the plant. Consider applying a fungicide if the problem persists.'
+            },
+            {
+                details: 'Wilting observed, check soil moisture levels.',
+                recommendations: 'Water the plant thoroughly if the soil is dry. Ensure proper drainage to prevent overwatering.'
+            },
         ];
-        randomDetails = issues[Math.floor(Math.random() * issues.length)];
+        const selectedIssue = issues[Math.floor(Math.random() * issues.length)];
+        randomDetails = selectedIssue.details;
+        randomRecommendations = selectedIssue.recommendations;
      }
 
      return {
         status: randomStatus,
         details: randomDetails,
+        recommendations: randomRecommendations,
      };
 
 

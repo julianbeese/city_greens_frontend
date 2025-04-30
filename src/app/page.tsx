@@ -23,20 +23,37 @@ async function mockAnalyzePlantImage(image: File): Promise<PlantAnalysis> {
   // Simulate different results
   const randomStatus = Math.random() > 0.4 ? 'healthy' : 'unhealthy';
   let randomDetails = 'No significant issues detected. Keep up the good work!';
+  let randomRecommendations: string | undefined = undefined;
+
   if (randomStatus === 'unhealthy') {
      const issues = [
-        'Yellowing leaves detected, possible nutrient deficiency (Nitrogen). Consider fertilizing.',
-        'Signs of pest damage (aphids) on lower leaves. Apply insecticidal soap.',
-        'Dark spots on leaves, potential early blight. Remove affected leaves and ensure good air circulation.',
-        'Wilting observed, check soil moisture levels. May need watering.',
+        {
+            details: 'Yellowing leaves detected, possible nutrient deficiency (Nitrogen).',
+            recommendations: 'Apply a balanced liquid fertilizer rich in Nitrogen. Follow product instructions carefully.'
+        },
+        {
+            details: 'Signs of pest damage (aphids) on lower leaves.',
+            recommendations: 'Spray the plant with insecticidal soap, focusing on the undersides of leaves. Repeat application if necessary.'
+        },
+        {
+            details: 'Dark spots on leaves, potential early blight.',
+            recommendations: 'Remove and destroy affected leaves immediately. Ensure good air circulation around the plant. Consider applying a fungicide if the problem persists.'
+        },
+        {
+            details: 'Wilting observed, check soil moisture levels.',
+            recommendations: 'Water the plant thoroughly if the soil is dry. Ensure proper drainage to prevent overwatering.'
+        },
      ];
-     randomDetails = issues[Math.floor(Math.random() * issues.length)];
+     const selectedIssue = issues[Math.floor(Math.random() * issues.length)];
+     randomDetails = selectedIssue.details;
+     randomRecommendations = selectedIssue.recommendations;
   }
 
 
   return {
     status: randomStatus,
     details: randomDetails,
+    recommendations: randomRecommendations,
   };
 }
 
@@ -121,7 +138,7 @@ export default function Home() {
         )}
       </div>
         <footer className="mt-12 text-center text-xs text-muted-foreground">
-             Powered by Sustainable Vertical Farming Tech
+             Powered by CityGreens
         </footer>
     </main>
   );
