@@ -7,7 +7,7 @@ import { AnalysisResult } from '@/components/analysis-result';
 import { LoadingSpinner } from '@/components/loading-spinner';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Leaf } from 'lucide-react'; // Use Leaf for the main icon
+import { Leaf } from 'lucide-react'; // Leaf icon is suitable for general plants
 
 // Mock function to simulate API call
 async function mockAnalyzePlantImage(image: File): Promise<PlantAnalysis> {
@@ -97,9 +97,9 @@ export default function Home() {
       <div className="flex flex-col items-center space-y-8 w-full max-w-2xl">
         <div className="text-center space-y-2">
            <Leaf className="h-12 w-12 mx-auto text-green-600" />
-           <h1 className="text-3xl sm:text-4xl font-bold text-foreground">Tomato Vision</h1>
+           <h1 className="text-3xl sm:text-4xl font-bold text-foreground">Plant Vision</h1> {/* Updated Title */}
            <p className="text-md text-muted-foreground">
-            Upload a photo of your tomato plant to check its health.
+            Upload a photo of your plant to check its health. {/* Updated Description */}
            </p>
         </div>
 
@@ -132,7 +132,7 @@ export default function Home() {
           <div className="flex flex-col items-center space-y-4 w-full">
             <AnalysisResult result={analysisResult} />
              <Button onClick={handleReset} variant="outline" className="mt-4">
-                Analyze Another Plant
+                Analyze Another Plant {/* Updated Button Text */}
              </Button>
           </div>
         )}

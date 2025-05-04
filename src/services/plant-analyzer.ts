@@ -1,5 +1,5 @@
 /**
- * Represents the analysis result of a tomato plant image.
+ * Represents the analysis result of a plant image.
  */
 export interface PlantAnalysis {
   /**
@@ -18,10 +18,10 @@ export interface PlantAnalysis {
 }
 
 /**
- * Asynchronously analyzes a tomato plant image and returns the analysis results.
+ * Asynchronously analyzes a plant image and returns the analysis results.
  * This function will eventually call the backend API.
  *
- * @param image The image file of the tomato plant.
+ * @param image The image file of the plant.
  * @returns A promise that resolves to a PlantAnalysis object.
  * @throws Throws an error if the API call fails or returns an error status.
  */

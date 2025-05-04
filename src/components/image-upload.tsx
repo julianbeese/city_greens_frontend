@@ -99,7 +99,7 @@ export function ImageUpload({ onImageUpload, isProcessing, className }: ImageUpl
              <div className="relative group w-full h-64 rounded-md overflow-hidden">
               <Image
                 src={previewUrl}
-                alt="Uploaded tomato plant"
+                alt="Uploaded plant" // Updated alt text
                 layout="fill" // Use fill layout
                 objectFit="cover" // Cover the area
                 className="transition-opacity duration-300"
