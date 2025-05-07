@@ -1,3 +1,4 @@
+
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
@@ -14,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Plant Vision - Plant Health Analysis', // Updated Title
+  title: 'Tomato Vision - Plant Health Analysis', // Updated Title
   description: 'Upload an image of your plant to check its health.', // Updated Description
 };
 

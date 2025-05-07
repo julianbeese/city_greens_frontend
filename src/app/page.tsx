@@ -1,78 +1,50 @@
+
 "use client";
 
-import { useState } from 'react';
-import type { PlantAnalysis } from '@/services/plant-analyzer';
+import { useState, useEffect } from 'react';
+import type { FullPlantAnalysisResponse } from '@/types/plant-analysis';
 import { ImageUpload } from '@/components/image-upload';
 import { AnalysisResult } from '@/components/analysis-result';
 import { LoadingSpinner } from '@/components/loading-spinner';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Leaf } from 'lucide-react'; // Leaf icon is suitable for general plants
-
-// Mock function to simulate API call
-async function mockAnalyzePlantImage(image: File): Promise<PlantAnalysis> {
-  console.log('Analyzing image:', image.name);
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 1500));
-
-  // Simulate potential errors
-  // if (Math.random() < 0.2) { // 20% chance of error
-  //   throw new Error("Failed to analyze image. Please try again.");
-  // }
-
-  // Simulate different results
-  const randomStatus = Math.random() > 0.4 ? 'healthy' : 'unhealthy';
-  let randomDetails = 'No significant issues detected. Keep up the good work!';
-  let randomRecommendations: string | undefined = undefined;
-
-  if (randomStatus === 'unhealthy') {
-     const issues = [
-        {
-            details: 'Yellowing leaves detected, possible nutrient deficiency (Nitrogen).',
-            recommendations: 'Apply a balanced liquid fertilizer rich in Nitrogen. Follow product instructions carefully.'
-        },
-        {
-            details: 'Signs of pest damage (aphids) on lower leaves.',
-            recommendations: 'Spray the plant with insecticidal soap, focusing on the undersides of leaves. Repeat application if necessary.'
-        },
-        {
-            details: 'Dark spots on leaves, potential early blight.',
-            recommendations: 'Remove and destroy affected leaves immediately. Ensure good air circulation around the plant. Consider applying a fungicide if the problem persists.'
-        },
-        {
-            details: 'Wilting observed, check soil moisture levels.',
-            recommendations: 'Water the plant thoroughly if the soil is dry. Ensure proper drainage to prevent overwatering.'
-        },
-     ];
-     const selectedIssue = issues[Math.floor(Math.random() * issues.length)];
-     randomDetails = selectedIssue.details;
-     randomRecommendations = selectedIssue.recommendations;
-  }
-
-
-  return {
-    status: randomStatus,
-    details: randomDetails,
-    recommendations: randomRecommendations,
-  };
-}
+import { Leaf } from 'lucide-react';
 
 export default function Home() {
-  const [uploadedImage, setUploadedImage] = useState<File | null>(null);
-  const [analysisResult, setAnalysisResult] = useState<PlantAnalysis | null>(null);
+  const [uploadedImageFile, setUploadedImageFile] = useState<File | null>(null);
+  const [uploadedImagePreviewUrl, setUploadedImagePreviewUrl] = useState<string | null>(null);
+  const [analysisResult, setAnalysisResult] = useState<FullPlantAnalysisResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleImageUpload = async (file: File) => {
-    setUploadedImage(file);
+    setUploadedImageFile(file);
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setUploadedImagePreviewUrl(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+
     setAnalysisResult(null); // Clear previous results
     setError(null); // Clear previous errors
     setIsLoading(true);
 
     try {
-      // TODO: Replace mockAnalyzePlantImage with actual API call
-      // const result = await analyzePlantImage(file); // Use the actual service function when ready
-      const result = await mockAnalyzePlantImage(file); // Use mock for now
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'API returned an error' }));
+        throw new Error(errorData.message || `API request failed with status ${response.status}`);
+      }
+
+      const result: FullPlantAnalysisResponse = await response.json();
       setAnalysisResult(result);
     } catch (err: any) {
       console.error("Analysis failed:", err);
@@ -84,22 +56,21 @@ export default function Home() {
   };
 
   const handleReset = () => {
-    setUploadedImage(null);
+    setUploadedImageFile(null);
+    setUploadedImagePreviewUrl(null);
     setAnalysisResult(null);
     setError(null);
     setIsLoading(false);
-     // Manually trigger removal in ImageUpload if necessary (depends on ImageUpload implementation)
-     // This might involve adding a reset function prop to ImageUpload
   };
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-8 bg-gradient-to-br from-background to-secondary/20">
       <div className="flex flex-col items-center space-y-8 w-full max-w-2xl">
         <div className="text-center space-y-2">
-           <Leaf className="h-12 w-12 mx-auto text-green-600" />
-           <h1 className="text-3xl sm:text-4xl font-bold text-foreground">Plant Vision</h1> {/* Updated Title */}
+           <Leaf className="h-12 w-12 mx-auto text-primary" />
+           <h1 className="text-3xl sm:text-4xl font-bold text-foreground">Tomato Vision</h1>
            <p className="text-md text-muted-foreground">
-            Upload a photo of your plant to check its health. {/* Updated Description */}
+            Upload a photo of your plant to check its health.
            </p>
         </div>
 
@@ -112,7 +83,7 @@ export default function Home() {
          )}
 
         {isLoading && (
-          <div className="flex flex-col items-center justify-center space-y-4 p-10 h-60">
+          <div className="flex flex-col items-center justify-center space-y-4 p-10 h-60 min-h-[300px]">
             <LoadingSpinner size={48} />
             <p className="text-muted-foreground animate-pulse">Analyzing your plant...</p>
           </div>
@@ -128,11 +99,14 @@ export default function Home() {
           </Alert>
         )}
 
-        {analysisResult && !isLoading && !error && (
+        {analysisResult && !isLoading && !error && uploadedImagePreviewUrl && (
           <div className="flex flex-col items-center space-y-4 w-full">
-            <AnalysisResult result={analysisResult} />
+            <AnalysisResult
+              analysisResult={analysisResult}
+              imageUrl={uploadedImagePreviewUrl}
+            />
              <Button onClick={handleReset} variant="outline" className="mt-4">
-                Analyze Another Plant {/* Updated Button Text */}
+                Analyze Another Plant
              </Button>
           </div>
         )}
