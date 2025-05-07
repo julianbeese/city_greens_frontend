@@ -1,99 +1,71 @@
+// src/services/plant-analyzer.ts
+
 /**
- * Represents the analysis result of a tomato plant image.
+ * Represents the core plant analysis details.
  */
-export interface PlantAnalysis {
-  /**
-   * The overall health status of the plant.
-   * Can be 'healthy' or a specific issue like 'unhealthy', 'nutrient_deficiency', 'pest_damage', etc.
-   */
-  status: 'healthy' | 'unhealthy' | string; // Allow for more specific unhealthy statuses
-  /**
-   * Detailed information about the analysis results (diagnosis).
-   */
-  details: string;
-  /**
-   * Recommended actions to take based on the analysis, if applicable.
-   */
-  recommendations?: string;
+export interface PlantAnalysisDetails { // Renamed from PlantAnalysis for clarity
+    status: 'healthy' | 'unhealthy' | string;
+    details: string;
+    recommendations?: string;
+}
+
+/**
+ * Represents the full analysis result from the API, including metadata.
+ */
+export interface FullAnalysisResult { // New interface for the full response
+    plant_analysis: PlantAnalysisDetails;
+    confidence_score: number;
+    processing_time_ms: number;
+    image_width: number;
+    image_height: number;
 }
 
 /**
  * Asynchronously analyzes a tomato plant image and returns the analysis results.
- * This function will eventually call the backend API.
  *
  * @param image The image file of the tomato plant.
- * @returns A promise that resolves to a PlantAnalysis object.
+ * @returns A promise that resolves to a FullAnalysisResult object.
  * @throws Throws an error if the API call fails or returns an error status.
  */
-export async function analyzePlantImage(image: File): Promise<PlantAnalysis> {
-  const formData = new FormData();
-  formData.append('image', image);
+export async function analyzePlantImage(image: File): Promise<FullAnalysisResult> { // Update return type
+    const formData = new FormData();
+    // The backend API expects the file to be named 'file' based on the test and route definition.
+    formData.append('file', image); // Ensure the key is 'file'
 
-  const apiUrl = 'https://your-backend-api.com/analyze'; // Replace with your actual API endpoint
+    // IMPORTANT: Replace with your actual backend API URL
+    // Make sure this points to where your FastAPI app is running,
+    // e.g., http://localhost:8000/api/analyze if running locally.
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/analyze';
+    // It's good practice to use an environment variable for the API URL.
 
-  try {
-    // Note: This fetch call is commented out for the MVP as we are mocking the response.
-    // Uncomment and adjust this when integrating the real backend.
-    /*
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      body: formData,
-      // Add any necessary headers, e.g., Authorization
-      // headers: {
-      //   'Authorization': `Bearer YOUR_API_TOKEN`,
-      // },
-    });
+    try {
+        // This is the actual fetch call to your backend
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            body: formData,
+            // Add any necessary headers if your API requires them (e.g., for auth)
+            // headers: {
+            //   'Authorization': `Bearer YOUR_API_TOKEN`,
+            // },
+        });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ message: 'API returned an error' }));
-      throw new Error(errorData.message || `API request failed with status ${response.status}`);
+        if (!response.ok) {
+            let errorData;
+            try {
+                errorData = await response.json();
+            } catch (e) {
+                errorData = { detail: `API request failed with status ${response.status}` };
+            }
+            // FastAPI often returns errors in a 'detail' field.
+            throw new Error(errorData.detail || `API request failed with status ${response.status}`);
+        }
+
+        const data: FullAnalysisResult = await response.json(); // Expect the full structure
+        return data;
+
+    } catch (error: any) {
+        console.error('Error analyzing plant image:', error);
+        // Provide a more user-friendly error message or let the component handle it
+        throw new Error(error.message || 'Failed to connect to the analysis service. Please try again.');
     }
-
-    const data: PlantAnalysis = await response.json();
-    return data;
-    */
-
-    // Mocked response for MVP development purposes
-    console.log('Mocking API call for image:', image.name);
-    await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate delay
-
-    const randomStatus = Math.random() > 0.4 ? 'healthy' : 'unhealthy';
-    let randomDetails = 'No significant issues detected. Keep up the good work!';
-    let randomRecommendations: string | undefined = undefined;
-
-     if (randomStatus === 'unhealthy') {
-        const issues = [
-            {
-                details: 'Yellowing leaves detected, possible nutrient deficiency (Nitrogen).',
-                recommendations: 'Apply a balanced liquid fertilizer rich in Nitrogen. Follow product instructions carefully.'
-            },
-            {
-                details: 'Signs of pest damage (aphids) on lower leaves.',
-                recommendations: 'Spray the plant with insecticidal soap, focusing on the undersides of leaves. Repeat application if necessary.'
-            },
-            {
-                details: 'Dark spots on leaves, potential early blight.',
-                recommendations: 'Remove and destroy affected leaves immediately. Ensure good air circulation around the plant. Consider applying a fungicide if the problem persists.'
-            },
-            {
-                details: 'Wilting observed, check soil moisture levels.',
-                recommendations: 'Water the plant thoroughly if the soil is dry. Ensure proper drainage to prevent overwatering.'
-            },
-        ];
-        const selectedIssue = issues[Math.floor(Math.random() * issues.length)];
-        randomDetails = selectedIssue.details;
-        randomRecommendations = selectedIssue.recommendations;
-     }
-
-     return {
-        status: randomStatus,
-        details: randomDetails,
-        recommendations: randomRecommendations,
-     };
-
-
-  } catch (error: any) {
-    console.error('Error analyzing plant image:', error);
-    throw new Error(error.message || 'Failed to connect to the analysis service.');
-  }
 }
