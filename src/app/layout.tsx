@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Tomato Vision - Plant Health Analysis',
-  description: 'Upload an image of your tomato plant to check its health.',
+  title: 'Plant Vision - Plant Health Analysis',
+  description: 'Upload an image of your plant to check its health.',
 };
 
 export default function RootLayout({

@@ -1,7 +1,7 @@
 // src/app/page.tsx
 "use client";
 
-import { useState } from 'react';
+import { useState } from 'react'
 // Update the import to use the new interface
 import type { FullAnalysisResult } from '@/services/plant-analyzer'; // <--- MODIFIED
 import { analyzePlantImage } from '@/services/plant-analyzer'; // Import the actual function
@@ -50,9 +50,9 @@ export default function Home() {
             <div className="flex flex-col items-center space-y-8 w-full max-w-2xl">
                 <div className="text-center space-y-2">
                     <Leaf className="h-12 w-12 mx-auto text-green-600" />
-                    <h1 className="text-3xl sm:text-4xl font-bold text-foreground">Tomato Vision</h1>
+                    <h1 className="text-3xl sm:text-4xl font-bold text-foreground">Plant Vision</h1>
                     <p className="text-md text-muted-foreground">
-                        Upload a photo of your tomato plant to check its health.
+                        Upload a photo of your plant to check its health.
                     </p>
                 </div>
 
